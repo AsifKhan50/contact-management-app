@@ -1,44 +1,44 @@
 import React, { useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { todoIdsSelector, todoSelector, todoActions } from "./store";
+import { todoIdsSelector, todoActions } from "./store";
+// import {Schema$Todo} from "./typings"
 import { UUID } from "./uuid";
-import {Todo} from "./Todo"
-
-
-
+import {Todo} from "./Todo";
+import "./style.css"
 
 const uuid = new UUID();
 
-  //  <Todo/>
-
 export const TodoList = React.memo(() => {
   const firstNameRef = useRef<HTMLInputElement>(null);
-  const lastNameRef = useRef<HTMLInputElement>(null);
+  const lastnameRef = useRef<HTMLInputElement>(null);
+  const taskRef = useRef<HTMLInputElement>(null);
+
 
   const todos = useSelector(todoIdsSelector);
   const [showActive, setShowActive] = useState(true);
   const dispatch = useDispatch();
 
-  const [status, setStatus] = useState("active"); // add status state to keep track of selected option
+  const [status, setStatus] = useState("active");
 
-  const addTodo = (firstName: string, lastName: string, status: string) =>
+  const addTodo = (firstname: string, lastname: string, status: any) =>
     dispatch(
       todoActions.createTodo({
         uniqueID: uuid.next(),
-        completed: false,
-        firstName,
-        lastName,
-        status, // pass status to the createTodo action
+        task: taskRef.current?.value || "",
+    completed: false,
+    firstname,
+    lastname,
+    status,
       })
     );
 
   const handleAddTodo = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const firstName = firstNameRef.current!.value;
-    const lastName = lastNameRef.current!.value;
-    addTodo(firstName, lastName, status); // pass status to addTodo function
+    const lastname = lastnameRef.current!.value;
+    addTodo(firstName, lastname, status);
     firstNameRef.current!.value = "";
-    lastNameRef.current!.value = "";
+    lastnameRef.current!.value = "";
   };
 
   return (
@@ -49,8 +49,8 @@ export const TodoList = React.memo(() => {
           <input required id="firstName" type="text" placeholder="First name" ref={firstNameRef} />
         </div>
         <div>
-          <label htmlFor="lastName">Last name:</label>
-          <input id="lastName" required type="text" placeholder="Last name" ref={lastNameRef} />
+          <label htmlFor="lastname">Last name:</label>
+          <input id="lastname" required type="text" placeholder="Last name" ref={lastnameRef} />
         </div>
         <div>
           <label>
@@ -67,12 +67,16 @@ export const TodoList = React.memo(() => {
       </form>
       <h4 style={{ marginBottom: "10px", color:"red", fontSize:"large" }}>Contact List</h4>
       {todos.length ? (
-       <table>
-       <tbody>
-         {todos.map((id) => (
-           <Todo id={id} key={id} />
-         ))}
-       </tbody>
+       <table className="todo-table">
+       
+         {todos.map((id) => {
+           if (id) {
+             return <Todo id={id} key={id} />
+           } else {
+             return null;
+           }
+         })}
+       
      </table>
      
       ) : (

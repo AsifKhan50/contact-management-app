@@ -4,5 +4,6 @@ export interface Schema$Todo {
     firstname: string;
     lastname: string;
     completed: boolean;
+    status : any
   }
   

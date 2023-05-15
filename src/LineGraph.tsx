@@ -5,6 +5,8 @@ import { registerables } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import Chart from 'chart.js/auto';
 import { useQuery } from 'react-query';
+import { ChartOptions } from 'chart.js';
+
 
 Chart.register(...registerables);
 
@@ -31,21 +33,23 @@ const LineGraph: React.FC = () => {
     return <div>Error: {(error as Error).message}</div>;
   }
 
-  const labels = Object.keys(data.cases).map((date) => format(new Date(date), 'MMM d'));
+  const labels = data?.cases && Object.keys(data.cases)
+  .map((date) => format(new Date(date), 'MMM d'));
 
-  const chartData = {
-    labels,
-    datasets: [
-      {
-        label: 'Cases',
-        fill: false,
-        borderColor: '#007bff',
-        data: Object.values(data.cases),
-      },
-    ],
-  };
+const chartData = {
+  labels: labels || [],
+  datasets: [
+    {
+      label: 'Cases',
+      fill: false,
+      borderColor: '#007bff',
+      data: Object.values(data?.cases ?? {}),
+    },
+  ],
+};
 
-  const options = {
+
+  const options: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
@@ -72,22 +76,25 @@ const LineGraph: React.FC = () => {
           },
           color: 'gray',
           stepSize: 2_000_000,
-          callback: (value: number) => {
-            if (value >= 100_000_000) {
-              return `${value / 1_000_000}M`;
-            } else if (value >= 1_000_000) {
-              return `${value / 1_000_000}M`;
-            } else if (value >= 1_000) {
-              return `${value / 1_000}K`;
+          callback: (value: string | number) => {
+            if (Number(value) >= 100_000_000) {
+              return `${Number(value) / 1_000_000}M`;
+            } else if (Number(value) >= 1_000_000) {
+              return `${Number(value) / 1_000_000}M`;
+            } else if (Number(value) >= 1_000) {
+              return `${Number(value) / 1_000}K`;
             }
             return value.toString();
           },
         },
         grid: {
-          borderDash: [2],
-          borderColor: 'gray',
+          ...({
+            borderDash: [2],
+            borderColor: 'gray',
+          } as any),
         },
       },
+      
     },
     plugins: {
       legend: {

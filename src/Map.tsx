@@ -1,6 +1,6 @@
 import { TileLayer, MapContainer, GeoJSON, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import L from "leaflet";
+import L, { Path } from "leaflet";
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useState } from "react";
 import type { LatLngExpression } from "leaflet";
@@ -24,11 +24,11 @@ const Map = () => {
   function onEachFeature(feature: any, layer: L.Layer) {
     if (feature.properties) {
       const { country, active, recovered, deaths } = feature.properties;
-
-      const latlng = layer.getBounds().getCenter();
-
-      const marker = L.marker(latlng).addTo(layer);
-
+  
+      const latlng = (layer as L.GeoJSON).getBounds().getCenter();
+  
+      const marker = L.marker(latlng).addTo(layer as L.LayerGroup);
+  
       const popupContent = `
         <div>
           <h3>${country}</h3>
@@ -37,10 +37,11 @@ const Map = () => {
           <p><b>Deaths:</b> ${deaths}</p>
         </div>
       `;
-
+  
       marker.bindPopup(popupContent);
     }
   }
+  
 
   return (
     <div className="map-div">
@@ -54,12 +55,12 @@ const Map = () => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {data.map((country) => (
+        {data.length > 0 && data.map((country: any) => (
           <Marker
-            key={country.countryInfo.iso3}
+            key={country.country}
             position={[
               country.countryInfo.lat + 3.,
-              country.countryInfo.long + -0.3,
+              country.countryInfo.long - 0.3,
             ]}
           >
             <Popup>
@@ -71,6 +72,8 @@ const Map = () => {
           </Marker>
         ))}
       </MapContainer>
+   
+
     </div>
   );
 };
